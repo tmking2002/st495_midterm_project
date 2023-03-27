@@ -1,0 +1,17 @@
+---
+title: "ST 491 Midterm Writeup"
+author: "Tyson King"
+date: "`r Sys.Date()`"
+output: pdf_document
+header-includes: \usepackage{setspace}\doublespacing
+---
+
+\doublespacing
+
+# Exploratory Data Analysis
+
+The dataset that I am going to be making inferences on contains information on 
+NCAA softball games during the 2022 and 2023 seasons. I am planning on using the 
+2022 season as the training data set and make inferences on the 2023 games. I am
+going to create a simple logistic regression model that uses a simple ranking 
+system (RPI) and make conclusions on the predicted outcome of a given game. 
