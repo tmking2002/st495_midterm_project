@@ -1,0 +1,66 @@
+ST 495 Midterm project outline:
+
+Choose a data set of interest (e.g., from https://www.kaggle.com/datasets)
+
+Identify inferential questions of interest about population features you might 
+learn about from your data set.
+
+Identify an appropriate statistical model and parameters for representing the
+population features of interest.
+
+Determine a statistical method for estimating the parameters of interesting that
+represent the population features of interest.
+
+Implement the estimation procedure on your real data set.  Comment on the fitted 
+model. 
+
+Construct a simulation study using synthetic data to investigate the performance
+of the estimation procedure (see below for an outline of how to do this). 
+General outline of the simulation study:
+
+(1) Generate 1 synthetic data set from the statistical model
+(2) Implement an estimation procedure (i.e., MLE, EM, MCMC,...)
+(3) Evaluate the estimated model (i.e., RMSE, AIC, BIC,... on test set)
+(4) Repeat steps (1)-(3) N times (larger N is better)
+(5) Use the output from (4) to produce plots and/or tables for inference
+
+Organize the simulation study into 3 script files:
+(a) run_file.r  # This script contains code for generating the data and running 
+                  the estimation procedure
+(c) out_file.r  # This script contains code for producing the plots/tables
+ 
+The output from run_file.r should be saved and then loaded by out_file.r.  And,
+the output from out_file.r should be saved, and then loaded (or copy-and-pasted)
+into your LaTex file to be compiled into the pdf file of the write-up of your 
+project.
+
+Next, your project submission should include a workflow file, which includes 
+ALL of the steps for reproducing your computations and plots/tables.  For 
+example, it will look something like:
+
+-------------------------------------------------------------------------------
+# This is the workflow to reproduce the results of the ST 495 midterm project by
+# (student name)
+
+for seed in {1..N}
+do
+Rscript run_file.r arg_1 arg_2 ...
+done
+
+Rscript out_file.r arg_1 arg_2 ...
+-------------------------------------------------------------------------------
+
+Note: This will require knowledge of how an interpretable language works 
+outside of a GUI environment (i.e., you should know how to run R outside of 
+Rstudio).  This is not hard, but is important for understanding how programming 
+skills fit into the broader application of problem solving in industry and 
+academia.  
+
+Finally, your project write-up will include a 10 page summary describing the
+statistical model, estimation procedure, and inference on your simulation study.
+You will also need to send me all script files INCLUDING your workflow file.
+
+Visit me periodically during office hours as you progress through your project.  
+THERE IS NO REASON THAT YOU SHOULD NOT GET FULL POINTS ON YOUR PROJECT.  If you
+learn nothing else in school, learn to be resourceful.  It will make you more 
+employable, and a more productive member of society. 
