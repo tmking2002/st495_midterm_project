@@ -8,10 +8,97 @@ header-includes: \usepackage{setspace}\doublespacing
 
 \doublespacing
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+load("out_file_output.RData")
+
+library(gt)
+```
+
 # Exploratory Data Analysis
 
 The dataset that I am going to be making inferences on contains information on 
 NCAA softball games during the 2022 and 2023 seasons. I am planning on using the 
 2022 season as the training data set and make inferences on the 2023 games. I am
-going to create a simple logistic regression model that uses a simple ranking 
-system (RPI) and make conclusions on the predicted outcome of a given game. 
+going to create a multiple linear regression model that uses a simple ranking 
+system (RPI) and make conclusions on the run differential between the two teams
+in a given game. The RPI ranking system generates a ranking coefficient between 
+0 and 1 with the formula: 
+
+$$
+RPI = 0.5 * (win\%) + 0.25 * (opponents'\ win\%) + 
+0.25 * (opponents'\ opponents'\ win\%)
+$$
+  
+Here is a link to the dataset on GitHub:  
+
+https://raw.githubusercontent.com/tmking2002/st491_midterm_project/main/scoreboard_dataset.RDS  
+  
+  
+  
+This is the model I will be making:  
+
+$$
+run\ differential = \beta_0 + \beta_1team1\_rpi + \beta_2team2\_rpi
+$$
+  
+\newpage
+  
+Here is a small snippet of the dataset:  
+  
+```{r head, fig.width = 6}
+gt(head(scoreboard))
+```
+
+Generally speaking, the team with the higher RPI coefficient is more likely to 
+win any given game. The question that I'll be trying to answer is *how much* 
+this difference impacts the expected run differential between the teams.
+
+```{r bar_plot, fig.align='center', fig.width=8, fig.height=3}
+print(run_diff_by_rpi_plot)
+```
+
+\newpage
+
+# Generate Synthetic Data
+
+I used the sample mean and sample standard deviations to create Gaussian 
+distributions for team1_rpi and team2_rpi with n = 10000. Then, for each row of
+rpi values, I created predicted run differential using a very crude technique 
+(10 * team1_rpi - 10 * team2_rpi).
+
+# Determining a Statistical Method for Estimating Parameters
+
+$$
+run\ differential = \beta_0 + \beta_1team1\_rpi + \beta_2team2\_rpi
+$$
+
+Now, I'll use least squares estimation to find the optimal values for $\beta_0$, 
+$\beta_1$, and $\beta_2$ from the synthetic data set.
+
+True $\beta_0$: `r beta_synthetic[1]`  
+Estimated $\beta_0$: `r round(mean(beta_hat_mat_synthetic[1]),3)`  
+  
+True $\beta_1$: `r beta_synthetic[2]`  
+Estimated $\beta_1$: `r round(mean(beta_hat_mat_synthetic[2]),3)`  
+  
+True $\beta_2$: `r beta_synthetic[3]`  
+Estimated $\beta_2$: `r round(mean(beta_hat_mat_synthetic[3]),3)`  
+
+# Evaluate Model on Real Dataset
+
+Estimated $\beta_0$: `r round(mean(beta_hat_mat[1]))`  
+Estimated $\beta_1$: `r round(mean(beta_hat_mat[2]))`  
+Estimated $\beta_2$: `r round(mean(beta_hat_mat[3]))`  
+  
+**Final Model from LSE:** 
+Run differential = 
+`r round(mean(beta_hat_mat[1]), 3)` + 
+`r round(mean(beta_hat_mat[2]), 3)` * team1_rpi - 
+`r abs(round(mean(beta_hat_mat[3])), 3)` * team2_rpi  
+  
+Mean Squared Error: `r round(mse,3)`
+
+
+
