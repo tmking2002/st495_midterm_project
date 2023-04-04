@@ -35,20 +35,15 @@ Here is a link to the dataset on GitHub:
 
 https://raw.githubusercontent.com/tmking2002/st491_midterm_project/main/scoreboard_dataset.RDS  
   
-  
-  
-This is the model I will be making:  
-
-$$
-run\ differential = \beta_0 + \beta_1team1\_rpi + \beta_2team2\_rpi
-$$
+The data is not perfect, as I have gathered it myself, but I think it'll do the
+job.
   
 \newpage
   
 Here is a small snippet of the dataset:  
   
 ```{r head, fig.width = 6}
-gt(head(scoreboard))
+gt(head(scoreboard_2022))
 ```
 
 Generally speaking, the team with the higher RPI coefficient is more likely to 
@@ -58,47 +53,222 @@ this difference impacts the expected run differential between the teams.
 ```{r bar_plot, fig.align='center', fig.width=8, fig.height=3}
 print(run_diff_by_rpi_plot)
 ```
+  
 
 \newpage
 
-# Generate Synthetic Data
+# Model 1: Multiple Linear Regression
+
+
+$$
+run\ differential = \beta_0 + \beta_1team1\_rpi + \beta_2team2\_rpi
+$$
+
+## Generate Synthetic Data
 
 I used the sample mean and sample standard deviations to create Gaussian 
 distributions for team1_rpi and team2_rpi with n = 10000. Then, for each row of
 rpi values, I created predicted run differential using a very crude technique 
 (10 * team1_rpi - 10 * team2_rpi).
 
-# Determining a Statistical Method for Estimating Parameters
-
-$$
-run\ differential = \beta_0 + \beta_1team1\_rpi + \beta_2team2\_rpi
-$$
+## Determining a Statistical Method for Estimating Parameters
 
 Now, I'll use least squares estimation to find the optimal values for $\beta_0$, 
 $\beta_1$, and $\beta_2$ from the synthetic data set.
 
-True $\beta_0$: `r beta_synthetic[1]`  
-Estimated $\beta_0$: `r round(mean(beta_hat_mat_synthetic[1]),3)`  
+True $\beta_0$: `r beta_synthetic_linear[1]`  
+Estimated $\beta_0$: `r round(mean(beta_hat_mat_synthetic_linear[1]),3)`  
   
-True $\beta_1$: `r beta_synthetic[2]`  
-Estimated $\beta_1$: `r round(mean(beta_hat_mat_synthetic[2]),3)`  
+True $\beta_1$: `r beta_synthetic_linear[2]`  
+Estimated $\beta_1$: `r round(mean(beta_hat_mat_synthetic_linear[2]),3)`  
   
-True $\beta_2$: `r beta_synthetic[3]`  
-Estimated $\beta_2$: `r round(mean(beta_hat_mat_synthetic[3]),3)`  
+True $\beta_2$: `r beta_synthetic_linear[3]`  
+Estimated $\beta_2$: `r round(mean(beta_hat_mat_synthetic_linear[3]),3)`  
 
-# Evaluate Model on Real Dataset
+## Evaluate Model on Real Dataset
 
-Estimated $\beta_0$: `r round(mean(beta_hat_mat[1]))`  
-Estimated $\beta_1$: `r round(mean(beta_hat_mat[2]))`  
-Estimated $\beta_2$: `r round(mean(beta_hat_mat[3]))`  
+Estimated $\beta_0$: `r round(mean(beta_hat_mat_linear[1]),3)`  
+Estimated $\beta_1$: `r round(mean(beta_hat_mat_linear[2]),3)`  
+Estimated $\beta_2$: `r round(mean(beta_hat_mat_linear[3]),3)`  
   
 **Final Model from LSE:** 
 Run differential = 
-`r round(mean(beta_hat_mat[1]), 3)` + 
-`r round(mean(beta_hat_mat[2]), 3)` * team1_rpi - 
-`r abs(round(mean(beta_hat_mat[3])), 3)` * team2_rpi  
+`r round(mean(beta_hat_mat_linear[1]), 3)` + 
+`r round(mean(beta_hat_mat_linear[2]), 3)` * team1_rpi - 
+`r abs(round(mean(beta_hat_mat_linear[3]), 3))` * team2_rpi  
   
-Mean Squared Error: `r round(mse,3)`
+**Root Mean Squared Error: `r round(rmse_linear,3)`**
 
+It's kind of difficult to understand the application of these parameters 
+because the RPI coefficient does not have units per se, but it definitely makes
+sense for $\beta_1$ to be positive and $\beta_2$ to be negative because a better
+team should have a good chance to beat a bad team and vice versa.   
+
+Here are some plots to test assumptions of model:
+
+```{r linear_model_plot, fig.align='center', fig.width=8, fig.height=3}
+linear_model_plot
+```
+  
+```{r linear_model_residual_plot, fig.align='center', fig.width=8, fig.height=3}
+linear_model_residual_plot
+```
+
+```{r linear_model_residual_hist, fig.align='center', fig.width=8, fig.height=3}
+linear_model_residual_hist
+```
+
+
+
+\newpage
+
+# Model 2: Nonlinear Regression (Input ^ 2)
+  
+I think it would make sense for the differences between teams at the top to be
+more significant than the difference between teams at the bottom (even if the 
+difference between their coefficients are the same). For example, I am 
+hypothesizing that a matchup between teams with coefficients .8 and .7 will have
+a higher predicted scoring margin than a matchup between teams with coefficients
+.4 and .3. Because of this, I'm going to try to run a regression with the 
+independent variables squared.
+
+
+$$
+run\ differential = \beta_0 + \beta_1team1\_rpi^2 + \beta_2team2\_rpi^2
+$$
+
+## Generate Synthetic Data
+
+I used the sample mean and sample standard deviations to create Gaussian 
+distributions for team1_rpi and team2_rpi with n = 10000. Then, for each row of
+rpi values, I created predicted run differential using a very crude technique 
+(20 * team1_rpi ^ 2 - 20 * team2_rpi ^ 2).
+
+## Determining a Statistical Method for Estimating Parameters
+
+Now, I'll use least squares estimation to find the optimal values for $\beta_0$, 
+$\beta_1$, and $\beta_2$ from the synthetic data set.
+
+True $\beta_0$: `r beta_synthetic_squared[1]`  
+Estimated $\beta_0$: `r round(mean(beta_hat_mat_synthetic_squared[1]),3)`  
+  
+True $\beta_1$: `r beta_synthetic_squared[2]`  
+Estimated $\beta_1$: `r round(mean(beta_hat_mat_synthetic_squared[2]),3)`  
+  
+True $\beta_2$: `r beta_synthetic_squared[3]`  
+Estimated $\beta_2$: `r round(mean(beta_hat_mat_synthetic_squared[3]),3)`  
+
+## Evaluate Model on Real Dataset
+
+Estimated $\beta_0$: `r round(mean(beta_hat_mat_squared[1]),3)`  
+Estimated $\beta_1$: `r round(mean(beta_hat_mat_squared[2]),3)`  
+Estimated $\beta_2$: `r round(mean(beta_hat_mat_squared[3]),3)`  
+  
+**Final Model from LSE:** 
+Run differential = 
+`r round(mean(beta_hat_mat_squared[1]), 3)` + 
+`r round(mean(beta_hat_mat_squared[2]), 3)` * team1_rpi - 
+`r abs(round(mean(beta_hat_mat_squared[3]), 3))` * team2_rpi  
+  
+**Root Mean Squared Error: `r round(rmse_squared,3)`**
+
+The coefficient estimates and RMSE are very similar between the linear model and
+this nonlinear model (not sure if that's by design or a coincidence). I was 
+going to try out a few different exponents to try to find the optimal nonlinear
+model for this data but now I think that would be a waste of time so I'm going
+to conclude that the linear model is the best choice for this dataset.
+
+\newpage
+
+Here are some plots to test assumptions of model:
+
+```{r squared_model_plot, fig.align='center', fig.width=8, fig.height=3}
+squared_model_plot
+```
+  
+```{r squared_model_residual_plot, fig.align='center', fig.width=8, fig.height=3}
+squared_model_residual_plot
+```
+
+```{r squared_model_residual_hist, fig.align='center', fig.width=8, fig.height=3}
+squared_model_residual_hist
+```
+
+\newpage
+
+# Test Model on Test Data
+
+Previously, I've only been using data from the 2022 season to create the models,
+but now I'm going to test them on data from the 2023 season to evaluate the 
+goodness of fit. First, I'm going to assume that the predicted outcome is a win
+for team1 if the predicted score_diff > 0. 
+
+Here's a ROC Curve of FPR vs. TPR
+
+```{r roc_curve, fig.align='center', fig.width=8, fig.height=3}
+roc_curve
+```
+
+This ROC curve looks like what it should with a slight curve from 0 to 1.  
+  
+The model correctly selected the winner in `r round(success_rate,3) * 100` % of
+the time, which is pretty good. I think the most significant way that the model 
+could be improved is by accounting for which team is home and which is away, but
+I don't have access to that data.
+
+\newpage
+
+Here is a graph of the predicted score differential vs. the actual score 
+differential: 
+
+```{r pred_vs_actual_2023, fig.align='center', fig.width=8, fig.height=3}
+model_plot_2023
+```
+
+This plot shows that the model is very well fit for the test dataset and the 
+residuals look relatively normally distributed. The linear trend line follows
+the data all the way across the plot which is also a good sign. There are a few 
+games which are outliers and skew far away from the trend line but this is 
+inevitable when working with sports data. Here are a few examples of the 
+highest residuals in the data (some being upsets and some just being huge 
+blowouts:  
+  
+
+```{r upsets_table, fig.width = 6}
+gt(upsets)
+```
+
+\newpage
+
+# Conclusion
+
+In conclusion, while the linear regression model based on RPI is a useful tool 
+for predicting softball game outcomes, it is important to recognize that it is 
+not the only factor at play. It is essential to consider other variables that 
+may impact game outcomes, such as player performance, weather conditions, and 
+even intangible factors like team morale and momentum.
+
+One way to improve the accuracy of the model is to incorporate additional data 
+points and variables that may contribute to game outcomes. For example, 
+incorporating data on individual player statistics or incorporating a measure of
+home-field advantage could potentially improve the model's predictive power.
+
+Another limitation of this model is that it only considers the outcomes of past 
+games and may not account for changes in team dynamics or player performance 
+over time. Therefore, it is important to continually update the model and 
+re-evaluate its performance to ensure that it remains accurate and relevant.
+
+Overall, while a linear regression model based on RPI can provide valuable 
+insights into softball game outcomes, it should be used in conjunction with 
+other sources of information and with a healthy degree of skepticism. By 
+considering all relevant factors and continually refining the model, we can 
+better predict game outcomes and gain a deeper understanding of the factors 
+that contribute to team success in softball and other sports.
+
+
+```{r delete_files, include=FALSE}
+file.remove("run_file_output.RData")
+file.remove("out_file_output.RData")
+```
 
 
